@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
 {
     public float speed;
     private Vector2 moveValue;
+    private int count;
     // Start is called before the first frame update
     void Start()
     {
@@ -14,14 +15,24 @@ public class PlayerController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    /*void Update()
     {
         
-    }
+    }*/
 
     void OnMove(InputValue value)
     {
         moveValue = value.Get<Vector2>();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "PickUp")
+        {
+            other.gameObject.SetActive(false);
+            count += 1;
+            //SetCountText();
+        }
     }
 
     private void FixedUpdate()
