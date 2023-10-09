@@ -18,6 +18,10 @@ public class GameController : MonoBehaviour
     private Rigidbody rb;
     private LineRenderer lineRenderer;
     private Mode modes;
+    public Material fishColour;
+    public Material blueColour;
+    public Material greenColour;
+
     /*private GameObject[] pickUps;*/
 
     // Start is called before the first frame update
@@ -58,6 +62,7 @@ public class GameController : MonoBehaviour
                     foreach (GameObject gameObject in pickUps)
                     {
                         gameObject.GetComponent<Renderer>().material.color = Color.white;
+                        //gameObject.GetComponent<Renderer>().material = 
                     }
                     //DistanceText.gameObject.SetActive(false);
                     lineRenderer.GetComponent<LineRenderer>().enabled = false;
