@@ -19,8 +19,17 @@ public class PlayerController : MonoBehaviour
     private Vector3 previousPosition;
     private GameObject[] allPickups;
     private GameObject closestPickup;
-    float closestPickUpDistance = 0.0f;
+    private float closestPickUpDistance = 0.0f;
     private LineRenderer lineRenderer;
+
+    enum DebugSettings
+    {
+        Normal,
+        Distance,
+        Vision
+    }
+
+    private DebugSettings debugType = DebugSettings.Normal;
 
     private void Start()
     {
@@ -32,6 +41,7 @@ public class PlayerController : MonoBehaviour
         allPickups = GameObject.FindGameObjectsWithTag("PickUp");
         closestPickup = allPickups[0];
         lineRenderer = gameObject.AddComponent<LineRenderer>();
+        lineRenderer.GetComponent<LineRenderer>().enabled = false;
     }
 
     void OnMove(InputValue value)
@@ -61,7 +71,7 @@ public class PlayerController : MonoBehaviour
     private void SetCountText()
     {
         scoreText.text = "Score: " + count.ToString();
-        if(count >= numPickups)
+        if (count >= numPickups)
         {
             winText.text = "You Win!";
             distanceToClosestPickUpText.text = " ";
@@ -70,29 +80,74 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        playerPositionText.text = "Player Position: " + this.transform.position.ToString();
-        playerVelocityText.text = "Player Velocity: " + ((this.transform.position - previousPosition) / Time.deltaTime);
+        
         distanceToClosestPickUpText.text = "Closest PickUp: " + closestPickUpDistance;
+        DebugModes();
         UpdateClosesetPickUp();
     }
 
     private void UpdateClosesetPickUp()
     {
+        allPickups = GameObject.FindGameObjectsWithTag("PickUp");
         closestPickUpDistance = Vector3.Distance(closestPickup.transform.position, this.transform.position);
         foreach (var PickUp in allPickups)
         {
-            float pickUpDistance = Vector3.Distance(PickUp.transform.position, this.transform.position);    
+            float pickUpDistance = Vector3.Distance(PickUp.transform.position, this.transform.position);
             PickUp.GetComponent<Renderer>().material.color = Color.white;
             if (pickUpDistance < closestPickUpDistance)
             {
-                closestPickup = PickUp; 
+                closestPickup = PickUp;
             }
         }
-        closestPickup.GetComponent<Renderer>().material.color = Color.blue;
-        lineRenderer.SetPosition (0, this.transform.position);
-        lineRenderer.SetPosition(1, closestPickup.transform.position);
-        lineRenderer.startWidth = 0.1f;
-        lineRenderer.endWidth = 0.1f;
+
+
+        if (debugType == DebugSettings.Distance)
+        {
+            playerPositionText.gameObject.SetActive(true);
+            playerVelocityText.gameObject.SetActive(true);
+            playerPositionText.text = "Player Position: " + this.transform.position.ToString();
+            playerVelocityText.text = "Player Velocity: " + ((this.transform.position - previousPosition) / Time.deltaTime);
+            closestPickup.GetComponent<Renderer>().material.color = Color.blue;
+            lineRenderer.GetComponent<LineRenderer>().enabled = true;
+            lineRenderer.SetPosition(0, this.transform.position);
+            lineRenderer.SetPosition(1, closestPickup.transform.position);
+            lineRenderer.startWidth = 0.1f;
+            lineRenderer.endWidth = 0.1f;
+        }
+        if (debugType == DebugSettings.Vision)
+        {
+            playerPositionText.gameObject.SetActive(false);
+            playerVelocityText.gameObject.SetActive(false);
+            closestPickup.GetComponent<Renderer>().material.color = Color.green;
+            closestPickup.gameObject.transform.LookAt(this.transform.position);
+            lineRenderer.SetPosition(0, this.transform.position);
+            lineRenderer.SetPosition(1, (this.transform.position - previousPosition) / Time.deltaTime);
+        }
+
     }
 
+    private void DebugModes()
+    {
+        if (Input.GetKeyDown("space"))
+        {
+            switch (debugType)
+            {
+                case DebugSettings.Normal:
+                    lineRenderer.GetComponent<LineRenderer>().enabled = false;
+                    debugType = DebugSettings.Distance;
+                    break;
+                case DebugSettings.Distance:
+                    debugType = DebugSettings.Vision;
+                    break;
+                case DebugSettings.Vision:
+                    debugType = DebugSettings.Normal;
+                    break;
+            }
+    
+
+        }
+    }
+
+
+ 
 }
